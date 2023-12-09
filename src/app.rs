@@ -42,14 +42,12 @@ impl Application for Criteria {
                         self.input_panel.update_x_input(value);
                         Command::none()
                     }
-                    ValueInputMessage::Update => Command::none(),
                 },
                 InputPanelMessage::YMessage(y_message) => match y_message {
                     ValueInputMessage::ValueChanged(value) => {
                         self.input_panel.update_y_input(value);
                         Command::none()
                     }
-                    ValueInputMessage::Update => Command::none(),
                 },
                 InputPanelMessage::GenerateButtonPressed => {
                     // let (x, y) = self.input_panel.get_x_y();

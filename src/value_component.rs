@@ -12,7 +12,6 @@ pub struct ValueInput {
 #[derive(Clone, Debug)]
 pub enum ValueInputMessage {
     ValueChanged(String),
-    Update,
 }
 
 impl ValueInput {
@@ -27,8 +26,7 @@ impl ValueInput {
         row![
             Text::new(format!("{}:", label)).width(Length::Shrink),
             row![text_input("Value", &self.value)
-                .on_input(|value| ValueInputMessage::ValueChanged(value))
-                .on_submit((|| ValueInputMessage::Update)())]
+                .on_input(|value| ValueInputMessage::ValueChanged(value))]
             .padding(10)
         ]
         .align_items(iced::Alignment::Center)
