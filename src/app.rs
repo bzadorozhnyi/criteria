@@ -52,8 +52,12 @@ impl Application for Criteria {
                     ValueInputMessage::Update => Command::none(),
                 },
                 InputPanelMessage::GenerateButtonPressed => {
-                    let (x, y) = self.input_panel.get_x_y();
-                    self.input_panel.custom_text = format!("x = {x}, y = {y}");
+                    // let (x, y) = self.input_panel.get_x_y();
+                    match self.input_panel.get_x_y() {
+                        Ok((x, y)) => {self.input_panel.custom_text = format!("x = {x}, y = {y}")},
+                        Err(message) => self.input_panel.custom_text = message.to_string()
+                    }
+                    // self.input_panel.custom_text = format!("x = {x}, y = {y}");
                     Command::none()
                 }
             },

@@ -57,7 +57,25 @@ impl InputPanel {
         self.y_input.value = value;
     }
 
-    pub fn get_x_y(&self) -> (String, String) {
-        return (self.x_input.value.clone(), self.y_input.value.clone());
+    pub fn get_x_y(&self) -> Result<(u32, u32), &str> {
+        let parse_positive_integer = |x: &String| -> Result<u32, &str> {
+            if let Ok(x) = x.parse::<u32>() {
+                if x > 0 {
+                    return Ok(x);
+                } else {
+                    return Err("Not positive integer");
+                }
+            } else {
+                return Err("Not integer");
+            }
+        };
+
+        match parse_positive_integer(&self.x_input.value) {
+            Ok(x) => match parse_positive_integer(&self.y_input.value) {
+                Ok(y) => Ok((x, y)),
+                Err(_) => Err("Y is not positive integer"),
+            },
+            Err(_) => Err("X is not positive integer"),
+        }
     }
 }
