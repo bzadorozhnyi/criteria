@@ -1,18 +1,15 @@
-use crate::value_component::{ValueInput, ValueInputMessage};
-use iced::widget::{button, Text};
+use crate::input_panel::{InputPanel, InputPanelMessage};
+use crate::value_component::ValueInputMessage;
+use iced::widget::row;
 use iced::{executor, Application, Command, Element, Length, Theme};
 
 pub struct Criteria {
-    x_input: ValueInput,
-    y_input: ValueInput,
-    custom_text: String,
+    input_panel: InputPanel,
 }
 
 #[derive(Clone, Debug)]
 pub enum Message {
-    XMessage(ValueInputMessage),
-    YMessage(ValueInputMessage),
-    GenerateButtonPressed,
+    InputPanel(InputPanelMessage),
 }
 
 impl Application for Criteria {
@@ -27,9 +24,7 @@ impl Application for Criteria {
     fn new(_flags: ()) -> (Self, iced::Command<Self::Message>) {
         (
             Criteria {
-                x_input: ValueInput::new(),
-                y_input: ValueInput::new(),
-                custom_text: "".to_string(),
+                input_panel: InputPanel::new(),
             },
             Command::none(),
         )
@@ -41,45 +36,35 @@ impl Application for Criteria {
 
     fn update(&mut self, message: Self::Message) -> iced::Command<Self::Message> {
         match message {
-            Message::XMessage(x_message) => match x_message {
-                ValueInputMessage::ValueChanged(value) => {
-                    self.x_input.value = value;
+            Message::InputPanel(input_panel_message) => match input_panel_message {
+                InputPanelMessage::XMessage(x_message) => match x_message {
+                    ValueInputMessage::ValueChanged(value) => {
+                        self.input_panel.update_x_input(value);
+                        Command::none()
+                    }
+                    ValueInputMessage::Update => Command::none(),
+                },
+                InputPanelMessage::YMessage(y_message) => match y_message {
+                    ValueInputMessage::ValueChanged(value) => {
+                        self.input_panel.update_y_input(value);
+                        Command::none()
+                    }
+                    ValueInputMessage::Update => Command::none(),
+                },
+                InputPanelMessage::GenerateButtonPressed => {
+                    let (x, y) = self.input_panel.get_x_y();
+                    self.input_panel.custom_text = format!("x = {x}, y = {y}");
                     Command::none()
                 }
-                ValueInputMessage::Update => Command::none(),
             },
-            Message::YMessage(y_message) => match y_message {
-                ValueInputMessage::ValueChanged(value) => {
-                    self.y_input.value = value;
-                    Command::none()
-                }
-                ValueInputMessage::Update => Command::none(),
-            },
-            Message::GenerateButtonPressed => {
-                self.custom_text =
-                    format!("x = {}, y = {}", self.x_input.value, self.y_input.value);
-                Command::none()
-            }
         }
     }
 
     fn view(&self) -> Element<Message> {
-        iced::widget::column![
-            iced::widget::row![iced::widget::column![
-                self.x_input
-                    .view("X")
-                    .map(move |message| Message::XMessage(message)),
-                Text::new(format!("Current X: {}", self.x_input.value))
-            ],],
-            iced::widget::row![iced::widget::column![
-                self.y_input
-                    .view("Y")
-                    .map(move |message| Message::YMessage(message)),
-                Text::new(format!("Current Y: {}", self.y_input.value))
-            ],],
-            button("Text").on_press(Message::GenerateButtonPressed),
-            Text::new(&self.custom_text)
-        ]
+        row![self
+            .input_panel
+            .view()
+            .map(move |message| Message::InputPanel(message))]
         .width(Length::Fill)
         .height(Length::Fill)
         .into()
