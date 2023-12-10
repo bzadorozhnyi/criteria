@@ -31,19 +31,20 @@ impl InputPanel {
         iced::widget::column![
             iced::widget::row![iced::widget::column![
                 self.x_input
-                    .view("X")
+                    .view()
                     .map(move |message| InputPanelMessage::XMessage(message)),
                 Text::new(format!("Current X: {}", self.x_input.value))
             ],],
             iced::widget::row![iced::widget::column![
                 self.y_input
-                    .view("Y")
+                    .view()
                     .map(move |message| InputPanelMessage::YMessage(message)),
                 Text::new(format!("Current Y: {}", self.y_input.value))
             ],],
-            button("Text").on_press(InputPanelMessage::GenerateButtonPressed),
+            button("Generate").on_press(InputPanelMessage::GenerateButtonPressed),
             Text::new(&self.custom_text)
         ]
+        .padding(10)
         .width(Length::Fill)
         .height(Length::Fill)
         .into()
@@ -57,9 +58,9 @@ impl InputPanel {
         self.y_input.value = value;
     }
 
-    pub fn get_x_y(&self) -> Result<(u32, u32), &str> {
-        let parse_positive_integer = |x: &String| -> Result<u32, &str> {
-            if let Ok(x) = x.parse::<u32>() {
+    pub fn get_x_y(&self) -> Result<(usize, usize), &str> {
+        let parse_positive_integer = |x: &String| -> Result<usize, &str> {
+            if let Ok(x) = x.parse::<usize>() {
                 if x > 0 {
                     return Ok(x);
                 } else {

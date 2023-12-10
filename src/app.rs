@@ -1,15 +1,19 @@
 use crate::input_panel::{InputPanel, InputPanelMessage};
+use crate::table::cell::CellMessage;
+use crate::table::table::{InputTable, InputTableMessage};
 use crate::value_component::ValueInputMessage;
-use iced::widget::row;
+use iced::widget::{column, row};
 use iced::{executor, Application, Command, Element, Length, Theme};
 
 pub struct Criteria {
     input_panel: InputPanel,
+    input_table: InputTable,
 }
 
 #[derive(Clone, Debug)]
 pub enum Message {
     InputPanel(InputPanelMessage),
+    InputTable(InputTableMessage),
 }
 
 impl Application for Criteria {
@@ -25,6 +29,7 @@ impl Application for Criteria {
         (
             Criteria {
                 input_panel: InputPanel::new(),
+                input_table: InputTable::new(0, 0),
             },
             Command::none(),
         )
@@ -50,23 +55,44 @@ impl Application for Criteria {
                     }
                 },
                 InputPanelMessage::GenerateButtonPressed => {
-                    // let (x, y) = self.input_panel.get_x_y();
                     match self.input_panel.get_x_y() {
-                        Ok((x, y)) => {self.input_panel.custom_text = format!("x = {x}, y = {y}")},
-                        Err(message) => self.input_panel.custom_text = message.to_string()
+                        Ok((x, y)) => {
+                            self.input_panel.custom_text = format!("x = {x}, y = {y}");
+                            println!("x = {x}, y = {y}");
+                            self.input_table = InputTable::new(x, y);
+                        }
+                        Err(message) => self.input_panel.custom_text = message.to_string(),
                     }
-                    // self.input_panel.custom_text = format!("x = {x}, y = {y}");
                     Command::none()
                 }
+            },
+            Message::InputTable(input_table_message) => match input_table_message {
+                InputTableMessage::CellUpdate(cell_update_message) => match cell_update_message {
+                    CellMessage::Update(row, col, input_value_message) => match input_value_message
+                    {
+                        ValueInputMessage::ValueChanged(value) => {
+                            self.input_table.update_cell(row, col, value);
+                            Command::none()
+                        }
+                    },
+                },
             },
         }
     }
 
     fn view(&self) -> Element<Message> {
-        row![self
-            .input_panel
-            .view()
-            .map(move |message| Message::InputPanel(message))]
+        column![
+            row![self
+                .input_panel
+                .view()
+                .map(move |message| Message::InputPanel(message))]
+            .height(Length::FillPortion(2)),
+            row![self
+                .input_table
+                .view()
+                .map(move |message| Message::InputTable(message))]
+            .height(Length::FillPortion(3)),
+        ]
         .width(Length::Fill)
         .height(Length::Fill)
         .into()

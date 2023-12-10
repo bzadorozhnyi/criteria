@@ -1,6 +1,6 @@
 use iced::{
-    widget::{row, text_input, Text},
-    Element, Length,
+    widget::{row, text_input},
+    Element,
 };
 
 #[derive(Clone, Debug)]
@@ -22,14 +22,9 @@ impl ValueInput {
         }
     }
 
-    pub fn view(&self, label: &str) -> Element<ValueInputMessage> {
-        row![
-            Text::new(format!("{}:", label)).width(Length::Shrink),
-            row![text_input("Value", &self.value)
-                .on_input(|value| ValueInputMessage::ValueChanged(value))]
-            .padding(10)
-        ]
-        .align_items(iced::Alignment::Center)
+    pub fn view(&self) -> Element<ValueInputMessage> {
+        row![text_input("Value", &self.value)
+            .on_input(|value| ValueInputMessage::ValueChanged(value))]
         .padding(10)
         .into()
     }
