@@ -58,7 +58,6 @@ impl Application for Criteria {
                     match self.input_panel.get_x_y() {
                         Ok((x, y)) => {
                             self.input_panel.custom_text = format!("x = {x}, y = {y}");
-                            println!("x = {x}, y = {y}");
                             self.input_table = InputTable::new(x, y);
                         }
                         Err(message) => self.input_panel.custom_text = message.to_string(),
