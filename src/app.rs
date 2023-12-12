@@ -1,19 +1,26 @@
+use crate::answer_block::slider_block;
+use crate::answer_block::uncertainty::{UncertaintyAnswerBlocks, UncertaintyAnswerBlocksMessage};
 use crate::input_panel::{InputPanel, InputPanelMessage};
 use crate::table::cell::CellMessage;
 use crate::table::table::{InputTable, InputTableMessage};
+use crate::utils::parse_data;
 use crate::value_component::ValueInputMessage;
-use iced::widget::{column, row};
+use iced::widget::{button, column, row};
 use iced::{executor, Application, Command, Element, Length, Theme};
 
 pub struct Criteria {
     input_panel: InputPanel,
     input_table: InputTable,
+    generate_answer: bool,
+    answer_block: Option<UncertaintyAnswerBlocks>,
 }
 
 #[derive(Clone, Debug)]
 pub enum Message {
     InputPanel(InputPanelMessage),
     InputTable(InputTableMessage),
+    GenerateCriterionsButtonPressed,
+    AnswerBlock(UncertaintyAnswerBlocksMessage),
 }
 
 impl Application for Criteria {
@@ -30,6 +37,8 @@ impl Application for Criteria {
             Criteria {
                 input_panel: InputPanel::new(),
                 input_table: InputTable::new(0, 0),
+                generate_answer: false,
+                answer_block: None,
             },
             Command::none(),
         )
@@ -76,11 +85,38 @@ impl Application for Criteria {
                     },
                 },
             },
+            Message::GenerateCriterionsButtonPressed => {
+                self.generate_answer = true;
+
+                let input_data = &self.input_table.get_data();
+
+                if let Ok(parsed_input_data) = parse_data(&input_data) {
+                    self.answer_block = Some(UncertaintyAnswerBlocks::new(parsed_input_data));
+                }
+
+                Command::none()
+            }
+            Message::AnswerBlock(answer_block_message) => match answer_block_message {
+                UncertaintyAnswerBlocksMessage::Alpha(hurwitz_block_message) => {
+                    match hurwitz_block_message {
+                        slider_block::SliderBlockMessage::AlphaChange(new_alpha) => {
+                            if self.answer_block.is_some() {
+                                self.answer_block.as_mut().unwrap().hurwitz_slider.value =
+                                    new_alpha;
+
+                                self.answer_block.as_mut().unwrap().update_hurwitz_block();
+                            }
+
+                            Command::none()
+                        }
+                    }
+                }
+            },
         }
     }
 
     fn view(&self) -> Element<Message> {
-        column![
+        let mut content = column![
             row![self
                 .input_panel
                 .view()
@@ -91,9 +127,19 @@ impl Application for Criteria {
                 .view()
                 .map(move |message| Message::InputTable(message))]
             .height(Length::FillPortion(3)),
-        ]
-        .width(Length::Fill)
-        .height(Length::Fill)
-        .into()
+            button("Evaluate criterions").on_press(Message::GenerateCriterionsButtonPressed),
+        ];
+
+        if self.generate_answer && self.answer_block.is_some() {
+            content = content.push(
+                self.answer_block
+                    .as_ref()
+                    .unwrap()
+                    .view()
+                    .map(move |message| Message::AnswerBlock(message)),
+            )
+        }
+
+        content.width(Length::Fill).height(Length::Fill).into()
     }
 }

@@ -63,4 +63,11 @@ impl InputTable {
     pub fn update_cell(&mut self, row: usize, col: usize, value: String) {
         self.data[row][col].input.value = value;
     }
+
+    pub fn get_data(&self) -> Vec<Vec<String>> {
+        self.data
+            .iter()
+            .map(|row| row.iter().map(|cell| cell.input.value.clone()).collect())
+            .collect()
+    }
 }

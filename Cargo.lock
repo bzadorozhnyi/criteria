@@ -416,6 +416,7 @@ name = "criteria"
 version = "0.1.0"
 dependencies = [
  "iced",
+ "num-traits",
 ]
 
 [[package]]
