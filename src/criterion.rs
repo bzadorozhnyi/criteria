@@ -120,7 +120,17 @@ pub mod risk_condition {
         )
     }
 
-    pub fn probability_maximization(a: &Vec<Vec<f32>>, p: &Vec<f32>, b: f32) -> (f32, Vec<usize>) {
+    pub fn probability_maximization(
+        a: &Vec<Vec<f32>>,
+        p: &Vec<f32>,
+        b: Option<f32>,
+    ) -> Option<(f32, Vec<usize>)> {
+        if b.is_none() {
+            return None;
+        }
+
+        let b = b.unwrap();
+
         let z = a
             .iter()
             .map(|row| {
@@ -133,7 +143,7 @@ pub mod risk_condition {
 
         let answer = get_max(&z);
 
-        (answer, get_indeces(&z, answer))
+        Some((answer, get_indeces(&z, answer)))
     }
 
     pub fn modal(a: &Vec<Vec<f32>>, p: &Vec<f32>) -> Option<(f32, Vec<usize>)> {
@@ -242,13 +252,13 @@ mod tests {
             let (a, p) = generate_test_data();
 
             assert_eq!(
-                probability_maximization(&a, &p, 40_000.0).0,
+                probability_maximization(&a, &p, Some(40_000.0)).unwrap().0,
                 0.5,
                 "Probability maximization gives incorrect result for a = 40_000."
             );
 
             assert_eq!(
-                probability_maximization(&a, &p, 10_000.0).0,
+                probability_maximization(&a, &p, Some(10_000.0)).unwrap().0,
                 0.6,
                 "Probability maximization gives incorrect result for a = 10_000."
             )

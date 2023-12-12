@@ -1,12 +1,9 @@
 use crate::criterion::uncertainty::{hurwitz, maximax, minimax, savage};
-use iced::{
-    widget::{column, Text},
-    Element,
-};
+use iced::{widget::column, Element};
 
 use super::{
     slider_block::{SliderBlock, SliderBlockMessage},
-    utils::generate_variants_block,
+    utils::gen_block,
 };
 
 pub struct UncertaintyAnswerBlocks {
@@ -15,7 +12,7 @@ pub struct UncertaintyAnswerBlocks {
     minimax_block: (f32, Vec<usize>),
     hurwitz_block: (f32, Vec<usize>),
     savage_block: (f32, Vec<usize>),
-    pub hurwitz_slider: SliderBlock::<f32>,
+    pub hurwitz_slider: SliderBlock<f32>,
 }
 
 #[derive(Clone, Debug)]
@@ -43,12 +40,12 @@ impl UncertaintyAnswerBlocks {
     pub fn view(&self) -> Element<UncertaintyAnswerBlocksMessage> {
         column![
             gen_block(
-                "Максімакс".to_string(),
+                "Максімакс",
                 self.maximax_block.0,
                 &self.maximax_block.1,
             ),
             gen_block(
-                "Мінімакс".to_string(),
+                "Мінімакс",
                 self.minimax_block.0,
                 &self.minimax_block.1,
             ),
@@ -56,12 +53,12 @@ impl UncertaintyAnswerBlocks {
                 .view()
                 .map(move |message| UncertaintyAnswerBlocksMessage::Alpha(message)),
             gen_block(
-                "Hurwitz".to_string(),
+                "Hurwitz",
                 self.hurwitz_block.0,
                 &self.hurwitz_block.1
             ),
             gen_block(
-                "Севіджа".to_string(),
+                "Севіджа",
                 self.savage_block.0,
                 &self.savage_block.1,
             )
@@ -72,18 +69,4 @@ impl UncertaintyAnswerBlocks {
     pub fn update_hurwitz_block(&mut self) {
         self.hurwitz_block = hurwitz(&self.a, self.hurwitz_slider.value);
     }
-}
-
-fn gen_block(
-    title: String,
-    answer_value: f32,
-    indeces: &Vec<usize>,
-) -> Element<'static, UncertaintyAnswerBlocksMessage> {
-    column![
-        Text::new(title).height(20),
-        Text::new(format!("Z = {}", answer_value)),
-        generate_variants_block(indeces)
-    ]
-    .spacing(10)
-    .into()
 }
