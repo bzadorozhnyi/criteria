@@ -1,4 +1,4 @@
-use crate::criterion::{hurwitz, maximax, minimax, savage};
+use crate::criterion::uncertainty::{hurwitz, maximax, minimax, savage};
 use iced::{
     widget::{column, Text},
     Element,
