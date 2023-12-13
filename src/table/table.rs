@@ -8,15 +8,18 @@ use super::cell::CellMessage;
 
 pub struct InputTable {
     data: Vec<Vec<Cell>>,
+    p: Vec<Cell>,
+    pub risk_condition: bool,
 }
 
 #[derive(Clone, Debug)]
 pub enum InputTableMessage {
     CellUpdate(CellMessage),
+    ProbabilityCellUpdate(CellMessage),
 }
 
 impl InputTable {
-    pub fn new(rows: usize, cols: usize) -> Self {
+    pub fn new(rows: usize, cols: usize, risk_condition: bool) -> Self {
         let mut matrix = Vec::with_capacity(rows);
         for row in 0..rows {
             let mut matrix_row = Vec::with_capacity(cols);
@@ -25,11 +28,20 @@ impl InputTable {
             }
             matrix.push(matrix_row);
         }
-        InputTable { data: matrix }
+        let mut p = Vec::with_capacity(cols);
+        for col in 0..cols {
+            p.push(Cell::new(0, col));
+        }
+
+        InputTable {
+            data: matrix,
+            p,
+            risk_condition,
+        }
     }
 
     pub fn view(&self) -> Element<InputTableMessage> {
-        let mut content_vec = Vec::new();
+        let mut data_vec = Vec::new();
 
         for row in &self.data {
             let row_elements: Vec<_> = row
@@ -41,7 +53,7 @@ impl InputTable {
                 })
                 .collect();
 
-            content_vec.push(Row::with_children(row_elements).width(Length::Fill).into());
+            data_vec.push(Row::with_children(row_elements).width(Length::Fill).into());
         }
 
         let columns_count = if self.data.is_empty() {
@@ -50,18 +62,36 @@ impl InputTable {
             self.data[0].len()
         } as f32;
 
-        scrollable(column![
-            column![Column::with_children(content_vec)].max_width(CELL_WIDTH * columns_count),
-        ])
-        .direction(scrollable::Direction::Both {
-            vertical: Properties::default(),
-            horizontal: Properties::default(),
-        })
-        .into()
+        let mut content =
+            column![Column::with_children(data_vec)].max_width(CELL_WIDTH * columns_count);
+        if self.risk_condition {
+            let p_table = Row::with_children(
+                self.p
+                    .iter()
+                    .map(|cell| {
+                        cell.view()
+                            .map(move |message| InputTableMessage::ProbabilityCellUpdate(message))
+                    })
+                    .collect(),
+            );
+
+            content = column![column![p_table].max_width(CELL_WIDTH * columns_count), content].spacing(20);
+        }
+
+        scrollable(column![content,])
+            .direction(scrollable::Direction::Both {
+                vertical: Properties::default(),
+                horizontal: Properties::default(),
+            })
+            .into()
     }
 
     pub fn update_cell(&mut self, row: usize, col: usize, value: String) {
         self.data[row][col].input.value = value;
+    }
+
+    pub fn update_probability_cell(&mut self, index: usize, value: String) {
+        self.p[index].input.value = value;
     }
 
     pub fn get_data(&self) -> Vec<Vec<String>> {
@@ -69,5 +99,13 @@ impl InputTable {
             .iter()
             .map(|row| row.iter().map(|cell| cell.input.value.clone()).collect())
             .collect()
+    }
+
+    pub fn get_p(&self) -> Vec<String> {
+        self.p.iter().map(|cell| cell.input.value.clone()).collect()
+    }
+
+    pub fn is_non_empty(&self) -> bool {
+        self.data.len() > 0 && self.data[0].len() > 0
     }
 }

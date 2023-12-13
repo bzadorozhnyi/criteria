@@ -1,8 +1,8 @@
-fn get_max(v: &Vec<f32>) -> f32 {
+pub fn get_max(v: &Vec<f32>) -> f32 {
     *(v.iter().max_by(|x, y| x.partial_cmp(y).unwrap()).unwrap())
 }
 
-fn get_min(v: &Vec<f32>) -> f32 {
+pub fn get_min(v: &Vec<f32>) -> f32 {
     *(v.iter().min_by(|x, y| x.partial_cmp(y).unwrap()).unwrap())
 }
 

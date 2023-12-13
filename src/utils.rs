@@ -17,6 +17,24 @@ pub fn parse_data(a: &Vec<Vec<String>>) -> Result<Vec<Vec<f32>>, &str> {
     return Ok(parsed_data);
 }
 
+pub fn parse_p(p: &Vec<String>) -> Result<Vec<f32>, &str> {
+    let mut parsed_p = Vec::with_capacity(p.len());
+
+    for cell in p {
+        if let Ok(parsed_cell_value) = cell.parse::<f32>() {
+            parsed_p.push(parsed_cell_value);
+        } else {
+            return Err("P is invalid.");
+        }
+    }
+
+    if parsed_p.iter().sum::<f32>() != 1.0 {
+        return Err("Sum of p doesn`t equal 1.");
+    }
+
+    return Ok(parsed_p);
+}
+
 #[cfg(test)]
 mod tests {
     use crate::utils::parse_data;
@@ -40,7 +58,11 @@ mod tests {
             vec!["-1.0".to_string(), "2".to_string(), "0".to_string()],
         ];
 
-        assert_eq!(parse_data(&a), Err("Matrix is invalid."), "First value in matrix is invalid float.");
+        assert_eq!(
+            parse_data(&a),
+            Err("Matrix is invalid."),
+            "First value in matrix is invalid float."
+        );
     }
 
     #[test]
@@ -50,7 +72,11 @@ mod tests {
             vec!["-1.0".to_string(), "a".to_string(), "".to_string()],
         ];
 
-        assert_eq!(parse_data(&a), Err("Matrix is invalid."), "First value in matrix is letter.");
+        assert_eq!(
+            parse_data(&a),
+            Err("Matrix is invalid."),
+            "First value in matrix is letter."
+        );
     }
 
     #[test]
@@ -60,6 +86,10 @@ mod tests {
             vec!["-1.0".to_string(), "a".to_string(), "".to_string()],
         ];
 
-        assert_eq!(parse_data(&a), Err("Matrix is invalid."), "First value in matrix is empty space.");
+        assert_eq!(
+            parse_data(&a),
+            Err("Matrix is invalid."),
+            "First value in matrix is empty space."
+        );
     }
 }

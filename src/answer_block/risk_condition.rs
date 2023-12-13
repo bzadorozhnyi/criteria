@@ -1,8 +1,11 @@
-use iced::widget::column;
+use std::ops::RangeInclusive;
+
+use iced::widget::{column, container};
 use iced::Element;
 
-use crate::criterion::risk_condition::{
-    bayes, dispersion_minimization, modal, probability_maximization,
+use crate::criterion::{
+    get_max, get_min,
+    risk_condition::{bayes, dispersion_minimization, modal, probability_maximization},
 };
 
 use super::{
@@ -29,8 +32,23 @@ impl RiskConditionAnswerBlocks {
     pub fn new(a: Vec<Vec<f32>>, p: Vec<f32>) -> Self {
         let bayes_block = bayes(&a, &p);
         let dispersion_minimization_block = dispersion_minimization(&a, &p);
-        let probability_maximization_block = probability_maximization(&a, &p, None);
+        let probability_maximization_block = if a.len() > 0 && a[0].len() > 0 {
+            println!("First slider");
+            probability_maximization(&a, &p, Some(a[0][0]))
+        } else {
+            println!("Second slider");
+            probability_maximization(&a, &p, None)
+        };
         let modal_block = modal(&a, &p);
+
+        println!("{:?}", probability_maximization_block);
+
+        let probability_maximization_slider = if probability_maximization_block.is_some() {
+            let range = get_probability_maximization_slider_range(&a);
+            SliderBlock::new(*range.start(), 1.0, range)
+        } else {
+            SliderBlock::new(0.0, 1.0, 0.0..=10.0) // default (not be used)
+        };
 
         RiskConditionAnswerBlocks {
             a,
@@ -39,32 +57,62 @@ impl RiskConditionAnswerBlocks {
             dispersion_minimization_block,
             probability_maximization_block,
             modal_block,
-            probability_maximization_slider: SliderBlock::new(0.0, 1.0, 0.0..=10.0), // default (not be used)
+            probability_maximization_slider,
         }
     }
 
     pub fn view(&self) -> Element<RiskConditionAnswerBlockMessage> {
-        let probability_maximization_block = self.probability_maximization_block.as_ref().unwrap();
-
         let mut content = column![
-            gen_block("Байєса", self.bayes_block.0, &self.bayes_block.1),
-            gen_block(
+            gen_block::<RiskConditionAnswerBlockMessage>(
                 "Байєса",
+                self.bayes_block.0,
+                &self.bayes_block.1
+            ),
+            gen_block(
+                "Мінімізація дисперсії",
                 self.dispersion_minimization_block.0,
                 &self.dispersion_minimization_block.1
             ),
-            gen_block(
-                "Байєса",
-                probability_maximization_block.0,
-                &probability_maximization_block.1
-            )
         ];
+
+        if self.probability_maximization_block.is_some() {
+            let probability_maximization = self.probability_maximization_block.as_ref().unwrap();
+
+            println!("{:?}", self.probability_maximization_slider);
+
+            content = content.push(
+                self.probability_maximization_slider
+                    .view()
+                    .map(move |message| RiskConditionAnswerBlockMessage::Alpha(message)),
+            );
+
+            content = content.push(gen_block(
+                "Максимізація ймовірнсоті",
+                probability_maximization.0,
+                &probability_maximization.1,
+            ))
+        }
 
         if self.modal_block.is_some() {
             let modal = self.modal_block.as_ref().unwrap();
             content = content.push(gen_block("Модальний", modal.0, &modal.1));
         }
 
-        content.into()
+        container(content).into()
     }
+
+    pub fn update_probability_maximization_block(&mut self) {
+        self.probability_maximization_block = probability_maximization(
+            &self.a,
+            &self.p,
+            Some(self.probability_maximization_slider.value),
+        );
+    }
+}
+
+pub fn get_probability_maximization_slider_range(a: &Vec<Vec<f32>>) -> RangeInclusive<f32> {
+    let min = get_min(&a.iter().map(|row| get_min(&row)).collect());
+    let max = get_max(&a.iter().map(|row| get_max(&row)).collect());
+
+    min..=max
 }

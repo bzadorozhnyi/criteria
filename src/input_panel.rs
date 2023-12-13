@@ -1,5 +1,5 @@
 use iced::{
-    widget::{button, Text},
+    widget::{button, checkbox, Text},
     Element, Length,
 };
 
@@ -9,6 +9,7 @@ pub struct InputPanel {
     x_input: ValueInput,
     y_input: ValueInput,
     pub custom_text: String,
+    pub risk_condition_checked: bool,
 }
 
 #[derive(Clone, Debug)]
@@ -16,6 +17,7 @@ pub enum InputPanelMessage {
     XMessage(ValueInputMessage),
     YMessage(ValueInputMessage),
     GenerateButtonPressed,
+    RiskConditionChecked(bool),
 }
 
 impl InputPanel {
@@ -24,6 +26,7 @@ impl InputPanel {
             x_input: ValueInput::new(),
             y_input: ValueInput::new(),
             custom_text: "".to_string(),
+            risk_condition_checked: false,
         }
     }
 
@@ -41,6 +44,11 @@ impl InputPanel {
                     .map(move |message| InputPanelMessage::YMessage(message)),
                 Text::new(format!("Current Y: {}", self.y_input.value))
             ],],
+            checkbox(
+                "Risk condition",
+                self.risk_condition_checked,
+                InputPanelMessage::RiskConditionChecked
+            ),
             button("Generate").on_press(InputPanelMessage::GenerateButtonPressed),
             Text::new(&self.custom_text)
         ]
