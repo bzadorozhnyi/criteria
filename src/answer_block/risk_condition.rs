@@ -33,15 +33,11 @@ impl RiskConditionAnswerBlocks {
         let bayes_block = bayes(&a, &p);
         let dispersion_minimization_block = dispersion_minimization(&a, &p);
         let probability_maximization_block = if a.len() > 0 && a[0].len() > 0 {
-            println!("First slider");
             probability_maximization(&a, &p, Some(a[0][0]))
         } else {
-            println!("Second slider");
             probability_maximization(&a, &p, None)
         };
         let modal_block = modal(&a, &p);
-
-        println!("{:?}", probability_maximization_block);
 
         let probability_maximization_slider = if probability_maximization_block.is_some() {
             let range = get_probability_maximization_slider_range(&a);
@@ -77,8 +73,6 @@ impl RiskConditionAnswerBlocks {
 
         if self.probability_maximization_block.is_some() {
             let probability_maximization = self.probability_maximization_block.as_ref().unwrap();
-
-            println!("{:?}", self.probability_maximization_slider);
 
             content = content.push(
                 self.probability_maximization_slider

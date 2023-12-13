@@ -1,8 +1,8 @@
 use crate::answer_block::risk_condition::{
-    get_probability_maximization_slider_range, RiskConditionAnswerBlockMessage,
+    RiskConditionAnswerBlockMessage,
     RiskConditionAnswerBlocks,
 };
-use crate::answer_block::slider_block::{self, SliderBlock};
+use crate::answer_block::slider_block::{self};
 use crate::answer_block::uncertainty::{UncertaintyAnswerBlocks, UncertaintyAnswerBlocksMessage};
 use crate::input_panel::{InputPanel, InputPanelMessage};
 use crate::table::cell::CellMessage;
@@ -191,7 +191,6 @@ impl Application for Criteria {
                 .input_table
                 .view()
                 .map(move |message| Message::InputTable(message))],
-            // .height(Length::FillPortion(3)),
         ];
 
         if self.input_table.is_non_empty() {
@@ -201,8 +200,6 @@ impl Application for Criteria {
         }
 
         if self.generate_answer {
-            println!("Generate answer!");
-
             if self.uncertainty_answer_block.is_some() {
                 content = content.push(row![self
                     .uncertainty_answer_block
@@ -225,7 +222,5 @@ impl Application for Criteria {
         scrollable(container(content.width(Length::Fill).height(Length::Fill)))
             .direction(scrollable::Direction::Vertical(Properties::default()))
             .into()
-
-        // content.width(Length::Fill).height(Length::Fill).into()
     }
 }
