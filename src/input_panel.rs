@@ -1,5 +1,5 @@
 use iced::{
-    widget::{button, checkbox, Text},
+    widget::{button, checkbox, column, row, Text},
     Element, Length,
 };
 
@@ -31,27 +31,32 @@ impl InputPanel {
     }
 
     pub fn view(&self) -> Element<InputPanelMessage> {
-        iced::widget::column![
-            iced::widget::row![iced::widget::column![
-                self.x_input
+        column![
+            row![
+                column![Text::new(format!("Кількість рядків: "))],
+                column![self
+                    .x_input
                     .view()
-                    .map(move |message| InputPanelMessage::XMessage(message)),
-                Text::new(format!("Current X: {}", self.x_input.value))
-            ],],
-            iced::widget::row![iced::widget::column![
-                self.y_input
+                    .map(move |message| InputPanelMessage::XMessage(message)),],
+            ]
+            .align_items(iced::Alignment::Center),
+            row![
+                column![Text::new(format!("Кількість стовпців: "))],
+                column![self
+                    .y_input
                     .view()
-                    .map(move |message| InputPanelMessage::YMessage(message)),
-                Text::new(format!("Current Y: {}", self.y_input.value))
-            ],],
+                    .map(move |message| InputPanelMessage::YMessage(message))],
+            ]
+            .align_items(iced::Alignment::Center),
             checkbox(
-                "Risk condition",
+                "В умовах ризику",
                 self.risk_condition_checked,
                 InputPanelMessage::RiskConditionChecked
             ),
-            button("Generate").on_press(InputPanelMessage::GenerateButtonPressed),
+            button("Генерувати").on_press(InputPanelMessage::GenerateButtonPressed),
             Text::new(&self.custom_text)
         ]
+        .spacing(5)
         .padding(10)
         .width(Length::Fill)
         .height(Length::Fill)
@@ -82,9 +87,9 @@ impl InputPanel {
         match parse_positive_integer(&self.x_input.value) {
             Ok(x) => match parse_positive_integer(&self.y_input.value) {
                 Ok(y) => Ok((x, y)),
-                Err(_) => Err("Y is not positive integer"),
+                Err(_) => Err("Кількість стовпців має бути додатнім цілим числом."),
             },
-            Err(_) => Err("X is not positive integer"),
+            Err(_) => Err("Кількість рядків має бути додатнім цілим числом."),
         }
     }
 }
