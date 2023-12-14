@@ -201,7 +201,7 @@ impl Application for Criteria {
 
         if self.input_table.is_non_empty() {
             content = content.push(
-                button("Evaluate criterions").on_press(Message::GenerateCriterionsButtonPressed),
+                button("Визначити критерії").on_press(Message::GenerateCriterionsButtonPressed),
             )
         }
 
