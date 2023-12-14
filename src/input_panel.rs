@@ -57,7 +57,6 @@ impl InputPanel {
             Text::new(&self.custom_text)
         ]
         .spacing(5)
-        .padding(10)
         .width(Length::Fill)
         .height(Length::Fill)
         .into()

@@ -1,6 +1,5 @@
 use crate::answer_block::risk_condition::{
-    RiskConditionAnswerBlockMessage,
-    RiskConditionAnswerBlocks,
+    RiskConditionAnswerBlockMessage, RiskConditionAnswerBlocks,
 };
 use crate::answer_block::slider_block::{self};
 use crate::answer_block::uncertainty::{UncertaintyAnswerBlocks, UncertaintyAnswerBlocksMessage};
@@ -219,8 +218,14 @@ impl Application for Criteria {
             }
         }
 
-        scrollable(container(content.width(Length::Fill).height(Length::Fill)))
-            .direction(scrollable::Direction::Vertical(Properties::default()))
-            .into()
+        scrollable(container(
+            content
+                .width(Length::Fill)
+                .height(Length::Fill)
+                .padding(10)
+                .spacing(5),
+        ))
+        .direction(scrollable::Direction::Vertical(Properties::default()))
+        .into()
     }
 }

@@ -1,7 +1,7 @@
-use crate::constants::CELL_WIDTH;
+use crate::constants::{CELL_WIDTH, TEXT_CELL_WIDTH};
 use crate::table::cell::Cell;
 use iced::widget::scrollable::Properties;
-use iced::widget::{column, scrollable, Column, Row};
+use iced::widget::{column, row, scrollable, Column, Row, Text};
 use iced::{Element, Length};
 
 use super::cell::CellMessage;
@@ -43,7 +43,30 @@ impl InputTable {
     pub fn view(&self) -> Element<InputTableMessage> {
         let mut data_vec = Vec::new();
 
-        for row in &self.data {
+        let mut heading: Vec<Element<InputTableMessage>> = Vec::new();
+        heading.push(
+            column![Text::new("")]
+                .align_items(iced::Alignment::Center)
+                .width(TEXT_CELL_WIDTH)
+                .padding(10)
+                .into(),
+        );
+
+        if self.is_non_empty() {
+            for col in 1..=self.data[0].len() {
+                heading.push(
+                    column![Text::new(format!("y{col}"))]
+                        .align_items(iced::Alignment::Center)
+                        .width(CELL_WIDTH)
+                        .padding(10)
+                        .into(),
+                );
+            }
+        }
+
+        let heading_row = Row::with_children(heading).align_items(iced::Alignment::Center);
+
+        for (row_index, row) in self.data.iter().enumerate() {
             let row_elements: Vec<_> = row
                 .iter()
                 .map(|cell| {
@@ -53,7 +76,17 @@ impl InputTable {
                 })
                 .collect();
 
-            data_vec.push(Row::with_children(row_elements).width(Length::Fill).into());
+            data_vec.push(
+                row![
+                    column![Text::new(format!("x{}", row_index + 1))]
+                        .align_items(iced::Alignment::Center)
+                        .width(TEXT_CELL_WIDTH)
+                        .padding(10),
+                    Row::with_children(row_elements).width(Length::Fill)
+                ]
+                .align_items(iced::Alignment::Center)
+                .into(),
+            );
         }
 
         let columns_count = if self.data.is_empty() {
@@ -62,8 +95,8 @@ impl InputTable {
             self.data[0].len()
         } as f32;
 
-        let mut content =
-            column![Column::with_children(data_vec)].max_width(CELL_WIDTH * columns_count);
+        let mut content = column![Column::with_children(data_vec)]
+            .max_width(CELL_WIDTH * columns_count + TEXT_CELL_WIDTH);
         if self.risk_condition {
             let p_table = Row::with_children(
                 self.p
@@ -75,15 +108,28 @@ impl InputTable {
                     .collect(),
             );
 
-            content = column![column![p_table].max_width(CELL_WIDTH * columns_count), content].spacing(20);
+            content = column![
+                column![row![
+                    column![column![Text::new("p")]
+                        .align_items(iced::Alignment::Center)
+                        .width(TEXT_CELL_WIDTH)
+                        .padding(10),],
+                    p_table
+                ]]
+                .max_width(CELL_WIDTH * columns_count + TEXT_CELL_WIDTH),
+                content
+            ]
         }
 
-        scrollable(column![content,])
-            .direction(scrollable::Direction::Both {
-                vertical: Properties::default(),
-                horizontal: Properties::default(),
-            })
-            .into()
+        scrollable(column![
+            column![heading_row].max_width(CELL_WIDTH * columns_count + TEXT_CELL_WIDTH),
+            content.spacing(5),
+        ])
+        .direction(scrollable::Direction::Both {
+            vertical: Properties::default(),
+            horizontal: Properties::default(),
+        })
+        .into()
     }
 
     pub fn update_cell(&mut self, row: usize, col: usize, value: String) {
