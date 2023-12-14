@@ -49,8 +49,8 @@ impl UncertaintyAnswerBlocks {
                 self.hurwitz_slider
                     .view()
                     .map(move |message| UncertaintyAnswerBlocksMessage::Alpha(message)),
-                Text::new(format!("Z = {}", self.maximax_block.0)),
-                generate_variants_block(&self.maximax_block.1)
+                Text::new(format!("Z = {}", self.hurwitz_block.0)),
+                generate_variants_block(&self.hurwitz_block.1)
             ]
             .spacing(10)],
             gen_block("Севіджа", self.savage_block.0, &self.savage_block.1,)

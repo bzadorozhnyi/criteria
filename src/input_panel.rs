@@ -23,8 +23,8 @@ pub enum InputPanelMessage {
 impl InputPanel {
     pub fn new() -> Self {
         InputPanel {
-            x_input: ValueInput::new(),
-            y_input: ValueInput::new(),
+            x_input: ValueInput::new("Кількість рядків".to_string()),
+            y_input: ValueInput::new("Кількість стовпців".to_string()),
             custom_text: "".to_string(),
             risk_condition_checked: false,
         }

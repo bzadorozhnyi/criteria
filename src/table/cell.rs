@@ -1,5 +1,5 @@
-use iced::{widget::column, Length};
 use iced::Element;
+use iced::{widget::column, Length};
 
 use crate::constants::CELL_WIDTH;
 use crate::value_component::{ValueInput, ValueInputMessage};
@@ -20,15 +20,15 @@ impl Cell {
         Cell {
             row,
             col,
-            input: ValueInput::new(),
+            input: ValueInput::new("Значення".to_string()),
         }
     }
 
     pub fn view(&self) -> Element<CellMessage> {
-        column![self.input
+        column![self
+            .input
             .view()
-            .map(move |message| CellMessage::Update(self.row, self.col, message))
-        ]
+            .map(move |message| CellMessage::Update(self.row, self.col, message))]
         .width(Length::Fixed(CELL_WIDTH))
         .into()
     }

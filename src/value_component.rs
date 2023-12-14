@@ -6,6 +6,7 @@ use iced::{
 #[derive(Clone, Debug)]
 pub struct ValueInput {
     pub value: String,
+    pub placeholder: String,
     _input: text_input::State,
 }
 
@@ -15,15 +16,16 @@ pub enum ValueInputMessage {
 }
 
 impl ValueInput {
-    pub fn new() -> Self {
+    pub fn new(placeholder: String) -> Self {
         ValueInput {
             value: String::new(),
+            placeholder,
             _input: text_input::State::new(),
         }
     }
 
     pub fn view(&self) -> Element<ValueInputMessage> {
-        row![text_input("Value", &self.value)
+        row![text_input(&self.placeholder, &self.value)
             .on_input(|value| ValueInputMessage::ValueChanged(value))]
         .padding(10)
         .into()
