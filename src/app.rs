@@ -153,6 +153,13 @@ impl Application for Criteria {
                         }
                     }
                 }
+                UncertaintyAnswerBlocksMessage::ProfitsLossesRadioChanged(radio_message) => match radio_message {
+                    crate::answer_block::profits_losses_radio::ProfitsLossesRadioMessage::RadioSelected(new_choice) => {
+                        self.uncertainty_answer_block.as_mut().unwrap().profits_losses_radio.update_selected_choise(new_choice);
+                        self.uncertainty_answer_block.as_mut().unwrap().update_minimax();
+                        Command::none()
+                    },
+                },
             },
             Message::RiskConditionAnswerBlock(answer_block_message) => match answer_block_message {
                 RiskConditionAnswerBlockMessage::Alpha(probability_maximization_block_message) => {

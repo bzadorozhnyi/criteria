@@ -11,6 +11,8 @@ fn get_indeces(a: &Vec<f32>, value: f32) -> Vec<usize> {
 }
 
 pub mod uncertainty {
+    use crate::answer_block::profits_losses_radio::Choise;
+
     use super::{get_indeces, get_max, get_min};
 
     pub fn maximax(a: &Vec<Vec<f32>>) -> (f32, Vec<usize>) {
@@ -21,12 +23,20 @@ pub mod uncertainty {
         (answer, get_indeces(&z, answer))
     }
 
-    pub fn minimax(a: &Vec<Vec<f32>>) -> (f32, Vec<usize>) {
-        let z: Vec<_> = a.iter().map(|row| get_min(row)).collect();
+    pub fn minimax(a: &Vec<Vec<f32>>, profits_losses: Choise) -> (f32, Vec<usize>) {
+        if profits_losses == Choise::Profits {
+            let z: Vec<_> = a.iter().map(|row| get_min(row)).collect();
 
-        let answer = get_max(&z);
+            let answer = get_max(&z);
 
-        (answer, get_indeces(&z, answer))
+            (answer, get_indeces(&z, answer))
+        } else {
+            let z: Vec<_> = a.iter().map(|row| get_max(row)).collect();
+
+            let answer = get_min(&z);
+
+            (answer, get_indeces(&z, answer))
+        }
     }
 
     pub fn hurwitz(a: &Vec<Vec<f32>>, alpha: f32) -> (f32, Vec<usize>) {
@@ -172,7 +182,10 @@ pub mod risk_condition {
 #[cfg(test)]
 mod tests {
     mod uncertainty {
-        use crate::criterion::uncertainty::{hurwitz, maximax, minimax, savage};
+        use crate::{
+            answer_block::profits_losses_radio::Choise,
+            criterion::uncertainty::{hurwitz, maximax, minimax, savage},
+        };
 
         fn generate_test_data() -> Vec<Vec<f32>> {
             vec![vec![45.0, 25.0, 50.0], vec![20.0, 60.0, 25.0]]
@@ -189,7 +202,11 @@ mod tests {
         fn test_minimax() {
             let a = generate_test_data();
 
-            assert_eq!(minimax(&a).0, 25.0, "Maximax gives incorrect result.");
+            assert_eq!(
+                minimax(&a, Choise::Profits).0,
+                25.0,
+                "Maximax gives incorrect result."
+            );
         }
 
         #[test]
