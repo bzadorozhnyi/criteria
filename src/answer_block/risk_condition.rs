@@ -1,6 +1,6 @@
 use std::ops::RangeInclusive;
 
-use iced::widget::{column, container};
+use iced::widget::{column, container, Text};
 use iced::Element;
 
 use crate::criterion::{
@@ -8,6 +8,7 @@ use crate::criterion::{
     risk_condition::{bayes, dispersion_minimization, modal, probability_maximization},
 };
 
+use super::utils::generate_variants_block;
 use super::{
     slider_block::{SliderBlock, SliderBlockMessage},
     utils::gen_block,
@@ -74,17 +75,15 @@ impl RiskConditionAnswerBlocks {
         if self.probability_maximization_block.is_some() {
             let probability_maximization = self.probability_maximization_block.as_ref().unwrap();
 
-            content = content.push(
+            content = content.push(column![column![
+                Text::new("Максимізація ймовірнсоті").height(20),
                 self.probability_maximization_slider
                     .view()
                     .map(move |message| RiskConditionAnswerBlockMessage::Alpha(message)),
-            );
-
-            content = content.push(gen_block(
-                "Максимізація ймовірнсоті",
-                probability_maximization.0,
-                &probability_maximization.1,
-            ))
+                Text::new(format!("Z = {}", probability_maximization.0)),
+                generate_variants_block(&probability_maximization.1)
+            ]
+            .spacing(10)]);
         }
 
         if self.modal_block.is_some() {
@@ -92,7 +91,7 @@ impl RiskConditionAnswerBlocks {
             content = content.push(gen_block("Модальний", modal.0, &modal.1));
         }
 
-        container(content).into()
+        container(content.spacing(40)).into()
     }
 
     pub fn update_probability_maximization_block(&mut self) {

@@ -1,9 +1,12 @@
 use crate::criterion::uncertainty::{hurwitz, maximax, minimax, savage};
-use iced::{widget::column, Element};
+use iced::{
+    widget::{column, Text},
+    Element,
+};
 
 use super::{
     slider_block::{SliderBlock, SliderBlockMessage},
-    utils::gen_block,
+    utils::{gen_block, generate_variants_block},
 };
 
 pub struct UncertaintyAnswerBlocks {
@@ -39,30 +42,20 @@ impl UncertaintyAnswerBlocks {
 
     pub fn view(&self) -> Element<UncertaintyAnswerBlocksMessage> {
         column![
-            gen_block(
-                "Максімакс",
-                self.maximax_block.0,
-                &self.maximax_block.1,
-            ),
-            gen_block(
-                "Мінімакс",
-                self.minimax_block.0,
-                &self.minimax_block.1,
-            ),
-            self.hurwitz_slider
-                .view()
-                .map(move |message| UncertaintyAnswerBlocksMessage::Alpha(message)),
-            gen_block(
-                "Hurwitz",
-                self.hurwitz_block.0,
-                &self.hurwitz_block.1
-            ),
-            gen_block(
-                "Севіджа",
-                self.savage_block.0,
-                &self.savage_block.1,
-            )
+            gen_block("Максімакс", self.maximax_block.0, &self.maximax_block.1,),
+            gen_block("Мінімакс", self.minimax_block.0, &self.minimax_block.1,),
+            column![column![
+                Text::new("Гурвіца").height(20),
+                self.hurwitz_slider
+                    .view()
+                    .map(move |message| UncertaintyAnswerBlocksMessage::Alpha(message)),
+                Text::new(format!("Z = {}", self.maximax_block.0)),
+                generate_variants_block(&self.maximax_block.1)
+            ]
+            .spacing(10)],
+            gen_block("Севіджа", self.savage_block.0, &self.savage_block.1,)
         ]
+        .spacing(40)
         .into()
     }
 
