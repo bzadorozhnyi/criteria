@@ -43,7 +43,7 @@ where
             .width(500),
         );
 
-        let text = text(format!("{}", self.value));
+        let text = text(format!("{:.2}", self.value));
 
         container(column![slider, text]).into()
     }

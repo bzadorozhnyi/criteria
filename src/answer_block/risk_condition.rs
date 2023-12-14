@@ -80,7 +80,7 @@ impl RiskConditionAnswerBlocks {
                 self.probability_maximization_slider
                     .view()
                     .map(move |message| RiskConditionAnswerBlockMessage::Alpha(message)),
-                Text::new(format!("Z = {}", probability_maximization.0)),
+                Text::new(format!("Z = {:.2}", probability_maximization.0)),
                 generate_variants_block(&probability_maximization.1)
             ]
             .spacing(10)]);
