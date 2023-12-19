@@ -22,7 +22,11 @@ pub fn parse_p(p: &Vec<String>) -> Result<Vec<f32>, &str> {
 
     for cell in p {
         if let Ok(parsed_cell_value) = cell.parse::<f32>() {
-            parsed_p.push(parsed_cell_value);
+            if 0.0 <= parsed_cell_value && parsed_cell_value <= 1.0 {
+                parsed_p.push(parsed_cell_value);
+            } else {
+                return Err("P is invalid.");
+            }
         } else {
             return Err("P is invalid.");
         }
