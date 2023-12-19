@@ -9,7 +9,7 @@ use crate::table::table::{InputTable, InputTableMessage};
 use crate::utils::{parse_data, parse_p};
 use crate::value_component::ValueInputMessage;
 use iced::widget::scrollable::Properties;
-use iced::widget::{button, column, container, row, scrollable};
+use iced::widget::{button, column, container, row, scrollable, Text};
 use iced::{executor, Application, Command, Element, Length, Theme};
 
 pub struct Criteria {
@@ -18,6 +18,7 @@ pub struct Criteria {
     generate_answer: bool,
     uncertainty_answer_block: Option<UncertaintyAnswerBlocks>,
     risk_condition_answer_block: Option<RiskConditionAnswerBlocks>,
+    answer_generation_error_text: String,
 }
 
 #[derive(Clone, Debug)]
@@ -46,6 +47,7 @@ impl Application for Criteria {
                 generate_answer: false,
                 uncertainty_answer_block: None,
                 risk_condition_answer_block: None,
+                answer_generation_error_text: String::new(),
             },
             Command::none(),
         )
@@ -122,12 +124,28 @@ impl Application for Criteria {
                             self.uncertainty_answer_block = None;
                             self.risk_condition_answer_block =
                                 Some(RiskConditionAnswerBlocks::new(parsed_input_data, parsed_p));
+
+                            self.answer_generation_error_text = String::new();
+                        }
+                        else {
+                            self.uncertainty_answer_block = None;
+                            self.risk_condition_answer_block = None;
+                            
+                            self.answer_generation_error_text = "Перевірте заповнені ймовірності на коректність.".to_string();
                         }
                     } else {
                         self.uncertainty_answer_block =
-                            Some(UncertaintyAnswerBlocks::new(parsed_input_data));
+                        Some(UncertaintyAnswerBlocks::new(parsed_input_data));
                         self.risk_condition_answer_block = None;
+
+                        self.answer_generation_error_text = String::new();
                     }
+                }
+                else {
+                    self.uncertainty_answer_block = None;
+                    self.risk_condition_answer_block = None;
+
+                    self.answer_generation_error_text = "Перевірте заповнену матрицю на коректність.".to_string();
                 }
 
                 Command::none()
@@ -222,6 +240,12 @@ impl Application for Criteria {
                     .unwrap()
                     .view()
                     .map(move |message| Message::RiskConditionAnswerBlock(message))])
+            }
+
+            if !self.answer_generation_error_text.is_empty() {
+                content = content.push(row![
+                    Text::new(self.answer_generation_error_text.clone())
+                ])
             }
         }
 
